@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cleanup
+spec:
+  description: This task will clean up a workspace by deleting all of the files.
+  workspaces:
+    - name: source
+  steps:
+    - name: remove
+      image: alpine:3
+      env:
+        - name: WORKSPACE_SOURCE_PATH
+          value: $(workspaces.source.path)
+      workingDir: $(workspaces.source.path)
+      command: ["/bin/sh", "-c"]
+      args:
+        - set -eu
+          ls -la $(WORKSPACE_SOURCE_PATH)
+          rm -rf $(WORKSPACE_SOURCE_PATH)/*
+          ls -la $(WORKSPACE_SOURCE_PATH)
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: jest-test
+spec:
+  description: This task runs Jest unit tests on a Node.js project.
+  workspaces:
+    - name: source
+  steps:
+    - name: run-jest-tests
+      image: node:20-alpine
+      workingDir: $(workspaces.source.path)
+      command: ["/bin/sh", "-c"]
+      args:
+        - npm ci && npm test
