@@ -15,11 +15,13 @@ spec:
       workingDir: $(workspaces.source.path)
       command: ["/bin/sh", "-c"]
       args:
-        - set -eu
-          ls -la $(WORKSPACE_SOURCE_PATH)
-          rm -rf $(WORKSPACE_SOURCE_PATH)/*
-          ls -la $(WORKSPACE_SOURCE_PATH)
-
+        - |
+          set -eu
+          echo "Cleaning workspace: $WORKSPACE_SOURCE_PATH"
+          ls -la $WORKSPACE_SOURCE_PATH
+          rm -rf $WORKSPACE_SOURCE_PATH/*
+          ls -la $WORKSPACE_SOURCE_PATH
+          echo "Cleanup complete."
 ---
 apiVersion: tekton.dev/v1beta1
 kind: Task
@@ -35,4 +37,9 @@ spec:
       workingDir: $(workspaces.source.path)
       command: ["/bin/sh", "-c"]
       args:
-        - npm ci && npm test
+        - |
+          echo "Installing dependencies..."
+          npm ci
+          echo "Running Jest unit tests..."
+          npm test
+          echo "Tests completed successfully."
